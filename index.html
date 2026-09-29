@@ -176,13 +176,22 @@
                         <!-- Müşteri ve Gemi Bilgileri -->
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <input type="text" class="form-control" name="Vessel_Name" id="modal-vessel" placeholder="Vessel Name" required>
+                                <input type="text" class="form-control" id="modal-vessel" placeholder="Vessel Name" required>
                             </div>
                             <div class="col-md-6">
-                                <input type="email" class="form-control" name="Contact_Email" id="modal-email" placeholder="Your Email" required>
+                                <input type="tel" class="form-control" id="modal-phone" placeholder="Mobile Phone" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="email" class="form-control" id="modal-email" placeholder="Your Email" required>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-outline-secondary w-100" onclick="getLocation()">
+                                    <i class="fa-solid fa-location-dot me-1"></i> <span id="btn-location">Share My Location</span>
+                                </button>
+                                <small id="location-status" class="text-muted"></small>
                             </div>
                         </div>
-                        
+
                         <!-- Dinamik Tablo Alanı -->
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover">
@@ -345,78 +354,90 @@
             }
         });
 
-        // Formu Gönderme Fonksiyonu (Sadece dolu olanları filtreler)
-        function submitForm() {
-            const vesselName = document.getElementById('modal-vessel').value;
-            const contactEmail = document.getElementById('modal-email').value;
+        // Google Apps Script web uygulaması adresi (kurulumdan sonra buraya yapıştır)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWrcatFhmkdXpNmVtdhlGXkV24aAwWRzfBpwJA-VlIOPkbrj3S1BF1MJHprt52EMT6/exec";
+        let currentLang = 'en';
+        let userLocation = null;
 
-            // Basit doğrulama
-            if (!vesselName || !contactEmail) {
-                alert("Lütfen Gemi Adı ve E-posta alanlarını doldurun. / Please fill in the Vessel Name and Email fields.");
-                return;
-            }
+        function msg(key) { return translations[currentLang][key]; }
 
-            // Yeni, geçici bir form oluşturuyoruz
-            const tempForm = document.createElement('form');
-            tempForm.action = "https://formspree.io/f/xvkgdopj"; // Sizin Formspree linkiniz
-            tempForm.method = "POST";
-            tempForm.enctype = "multipart/form-data";
-            tempForm.style.display = 'none';
+        // Konum alma
+        function getLocation() {
+            const status = document.getElementById('location-status');
+            if (!navigator.geolocation) { status.textContent = msg('msg-loc-unsupported'); return; }
+            status.textContent = msg('msg-loc-loading');
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    status.textContent = msg('msg-loc-ok');
+                },
+                () => { userLocation = null; status.textContent = msg('msg-loc-fail'); },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
 
-            // Gemi adı ve E-posta'yı gizli input olarak ekliyoruz
-            tempForm.appendChild(createHiddenInput('Vessel_Name', vesselName));
-            tempForm.appendChild(createHiddenInput('Contact_Email', contactEmail));
+        // Görseli küçültüp base64'e çevirir (mail boyutu şişmesin)
+        function fileToBase64(file) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    const scale = Math.min(1, 1280 / Math.max(img.width, img.height));
+                    const c = document.createElement('canvas');
+                    c.width = Math.round(img.width * scale);
+                    c.height = Math.round(img.height * scale);
+                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                    URL.revokeObjectURL(url);
+                    resolve({ type: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.75).split(',')[1] });
+                };
+                img.onerror = () => resolve(null);
+                img.src = url;
+            });
+        }
 
-            // Tablodaki tüm satırları al
-            const rows = document.querySelectorAll('#table-body tr');
-            let itemCounter = 1;
+        // Formu Gönderme Fonksiyonu (sadece dolu satırları gönderir)
+        async function submitForm() {
+            const vessel = document.getElementById('modal-vessel').value.trim();
+            const email = document.getElementById('modal-email').value.trim();
+            const phone = document.getElementById('modal-phone').value.trim();
 
-            rows.forEach((row) => {
+            if (!vessel || !email || !phone) { alert(msg('msg-required')); return; }
+
+            const items = [];
+            for (const row of document.querySelectorAll('#table-body tr')) {
                 const product = row.querySelector('.product-input').value.trim();
                 const qty = row.querySelector('.qty-input').value.trim();
                 const desc = row.querySelector('.desc-input').value.trim();
-                const imageFile = row.querySelector('.image-input').files[0];
-
-                // Eğer satırdaki Ürün Adı, Miktar veya Açıklama alanlarından BİRİ bile doluysa bu satırı gönder
-                if (product !== "" || qty !== "" || desc !== "" || imageFile) {
-                    
-                    if (product !== "") tempForm.appendChild(createHiddenInput(`Item_${itemCounter}_Product`, product));
-                    if (qty !== "") tempForm.appendChild(createHiddenInput(`Item_${itemCounter}_Quantity`, qty));
-                    if (desc !== "") tempForm.appendChild(createHiddenInput(`Item_${itemCounter}_Description`, desc));
-                    
-                    // Dosya varsa kopyalayıp ekle
-                    if (imageFile) {
-                        const fileInputClone = row.querySelector('.image-input').cloneNode();
-                        fileInputClone.name = `Item_${itemCounter}_Image`;
-                        // Dosyaları JS ile doğrudan form içine kopyalamak güvenlik nedeniyle kısıtlıdır, 
-                        // bu yüzden DataTransfer nesnesi kullanıyoruz.
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(imageFile);
-                        fileInputClone.files = dataTransfer.files;
-                        tempForm.appendChild(fileInputClone);
-                    }
-                    itemCounter++;
+                const file = row.querySelector('.image-input').files[0];
+                if (product || qty || desc || file) {
+                    items.push({ product, qty, desc, image: file ? await fileToBase64(file) : null });
                 }
-            });
-
-            // Eğer hiç ürün girilmediyse uyar
-            if (itemCounter === 1) {
-                alert("Lütfen en az bir ürün ekleyin. / Please add at least one product.");
-                return;
             }
+            if (items.length === 0) { alert(msg('msg-no-items')); return; }
 
-            // Oluşturulan geçici formu gövdeye ekle ve gönder
-            document.body.appendChild(tempForm);
-            tempForm.submit();
-        }
-
-        // Gizli Input Oluşturma Yardımcı Fonksiyonu
-        function createHiddenInput(name, value) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value;
-            return input;
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.textContent = msg('msg-sending');
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ vessel, email, phone, location: userLocation, items })
+                });
+                alert(msg('msg-success'));
+                document.getElementById('dynamic-rfq-form').reset();
+                userLocation = null;
+                document.getElementById('location-status').textContent = '';
+                const modalEl = document.getElementById('rfqModal');
+                const inst = bootstrap.Modal.getInstance(modalEl);
+                if (inst) inst.hide();
+            } catch (err) {
+                alert(msg('msg-error'));
+            } finally {
+                btn.disabled = false;
+                btn.textContent = translations[currentLang]['btn-submit'];
+            }
         }
 
         // DİL SÖZLÜĞÜ (Modal metinleri eklendi)
@@ -451,7 +472,18 @@
                 "th-image": "Image (Optional)",
                 "btn-add-row": "Add Product",
                 "btn-cancel": "Cancel",
-                "btn-submit": "Submit Request"
+                "btn-submit": "Submit Request",
+                "modal-phone": "Mobile Phone",
+                "btn-location": "Share My Location",
+                "msg-loc-unsupported": "Location is not supported by this browser",
+                "msg-loc-loading": "Getting location...",
+                "msg-loc-ok": "✅ Location added",
+                "msg-loc-fail": "❌ Could not get location, please allow access",
+                "msg-required": "Please fill in Vessel Name, Phone and Email.",
+                "msg-no-items": "Please add at least one product.",
+                "msg-sending": "Sending...",
+                "msg-success": "Your request has been sent. Thank you!",
+                "msg-error": "Could not send. Please check your connection and try again."
             },
             tr: {
                 "nav-home": "Ana Sayfa",
@@ -483,11 +515,23 @@
                 "th-image": "Görsel (Opsiyonel)",
                 "btn-add-row": "Ürün Ekle",
                 "btn-cancel": "İptal",
-                "btn-submit": "Gönder"
+                "btn-submit": "Gönder",
+                "modal-phone": "Cep Telefonu",
+                "btn-location": "Konumumu Paylaş",
+                "msg-loc-unsupported": "Tarayıcı konumu desteklemiyor",
+                "msg-loc-loading": "Konum alınıyor...",
+                "msg-loc-ok": "✅ Konum eklendi",
+                "msg-loc-fail": "❌ Konum alınamadı, lütfen izin verin",
+                "msg-required": "Lütfen Gemi Adı, Telefon ve E-posta alanlarını doldurun.",
+                "msg-no-items": "Lütfen en az bir ürün ekleyin.",
+                "msg-sending": "Gönderiliyor...",
+                "msg-success": "Talebiniz gönderildi. Teşekkürler!",
+                "msg-error": "Gönderilemedi. Bağlantınızı kontrol edip tekrar deneyin."
             }
         };
 
         function changeLanguage(lang) {
+            currentLang = lang;
             for (let key in translations[lang]) {
                 let element = document.getElementById(key);
                 if (element) {
