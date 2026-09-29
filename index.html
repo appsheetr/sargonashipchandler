@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sargona Ship Chandler</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome İkonları -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --maritime-blue: #004b79;
+            --fresh-green: #28a745;
+            --clean-white: #ffffff;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+            scroll-behavior: smooth;
+        }
+        
+        .navbar-custom {
+            background-color: var(--maritime-blue);
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(0, 75, 121, 0.5), rgba(0, 0, 0, 0.7)), url('assets/image_bf741f.jpg') no-repeat center center;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--clean-white);
+            text-align: center;
+        }
+        
+        .btn-custom {
+            background-color: var(--fresh-green);
+            color: var(--clean-white);
+            border: none;
+            font-weight: bold;
+        }
+        .btn-custom:hover {
+            background-color: #218838;
+            color: var(--clean-white);
+        }
+
+        .overlap-section {
+            margin-top: -100px;
+            position: relative;
+            z-index: 10;
+        }
+        .overlap-img {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+            border: 6px solid var(--clean-white);
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .overlap-img:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+        }
+
+        .service-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+
+        .contact-section {
+            background-color: var(--clean-white);
+        }
+
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 40px;
+            right: 40px;
+            background-color: #25d366;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 3px #999;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            color: #FFF;
+        }
+        
+        footer {
+            background-color: var(--maritime-blue);
+            color: var(--clean-white);
+        }
+
+        /* Modal (Pop-up) Tablo Ayarları */
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: var(--maritime-blue) !important;
+            color: white !important;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENÜ (NAVBAR) -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fa-solid fa-ship me-2"></i>SARGONA SHIP CHANDLER
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home" id="nav-home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services" id="nav-services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact" id="nav-contact-menu">Contact</a></li>
+                </ul>
+                <div class="d-flex">
+                    <button type="button" class="btn btn-outline-light btn-sm me-2" onclick="changeLanguage('en')">EN</button>
+                    <button type="button" class="btn btn-outline-light btn-sm" onclick="changeLanguage('tr')">TR</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- GİRİŞ BÖLÜMÜ (HERO SECTION) -->
+    <div id="home" class="hero-section">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-4" id="hero-title">Your Reliable Partner in the Black Sea</h1>
+            <p class="lead mb-4" id="hero-desc">24/7 Supply of Provisions, Consumables and Technical Services between Samsun and Artvin Ports.</p>
+            <button type="button" class="btn btn-custom btn-lg px-5 py-3 rounded-pill shadow" id="hero-btn" data-bs-toggle="modal" data-bs-target="#rfqModal">
+                Get a Quote
+            </button>
+        </div>
+    </div>
+
+    <!-- POP-UP (MODAL) TALEP FORMU -->
+    <div class="modal fade" id="rfqModal" tabindex="-1" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="modal-title" style="color: var(--maritime-blue);">Request Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- ID Eklendi, action ve method JS tarafına taşınacak -->
+                <form id="dynamic-rfq-form"> 
+                    <div class="modal-body">
+                        <!-- Müşteri ve Gemi Bilgileri -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" name="Vessel_Name" id="modal-vessel" placeholder="Vessel Name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="email" class="form-control" name="Contact_Email" id="modal-email" placeholder="Your Email" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Dinamik Tablo Alanı -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th width="5%">#</th>
+                                        <th width="25%" id="th-product">Product Name</th>
+                                        <th width="15%" id="th-qty">Quantity</th> <!-- Yeni Sütun -->
+                                        <th width="35%" id="th-desc">Description / Specs</th>
+                                        <th width="20%" id="th-image">Image (Optional)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body">
+                                    <!-- Satırlar JavaScript ile buraya eklenecek -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Satır Ekle Butonu -->
+                        <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addRow()">
+                            <i class="fa-solid fa-plus me-1"></i> <span id="btn-add-row">Add Product</span>
+                        </button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="btn-cancel">Cancel</button>
+                        <button type="button" class="btn btn-custom" id="btn-submit" onclick="submitForm()">Submit Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- KESİŞEN (OVERLAP) RESİMLER BÖLÜMÜ -->
+    <div class="container overlap-section">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <img src="assets/ship-1.jpeg" alt="Ship Supply 1" class="img-fluid overlap-img">
+            </div>
+            <div class="col-md-4">
+                <img src="assets/ship-2.jpeg" alt="Ship Supply 2" class="img-fluid overlap-img">
+            </div>
+            <div class="col-md-4">
+                <img src="assets/ship-3.jpeg" alt="Ship Supply 3" class="img-fluid overlap-img">
+            </div>
+        </div>
+    </div>
+
+    <!-- HİZMETLER BÖLÜMÜ -->
+    <div id="services" class="container pt-5 mt-4">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" id="services-title" style="color: var(--maritime-blue);">Our Services</h2>
+            <div class="mx-auto mt-3" style="width: 60px; height: 3px; background-color: var(--fresh-green);"></div>
+        </div>
+        
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 service-card">
+                    <div class="card-body py-5">
+                        <i class="fa-solid fa-utensils fa-3x mb-4" style="color: var(--fresh-green);"></i>
+                        <h4 class="card-title fw-bold mb-3" id="service1-title">Provisions</h4>
+                        <p class="card-text text-muted" id="service1-desc">Fresh, frozen, and dry provisions supplied with the highest quality standards for your crew.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 service-card">
+                    <div class="card-body py-5">
+                        <i class="fa-solid fa-toolbox fa-3x mb-4" style="color: var(--fresh-green);"></i>
+                        <h4 class="card-title fw-bold mb-3" id="service2-title">Deck & Engine Stores</h4>
+                        <p class="card-text text-muted" id="service2-desc">Complete range of cabin, deck, and engine consumables and marine hardware.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 service-card">
+                    <div class="card-body py-5">
+                        <i class="fa-solid fa-wrench fa-3x mb-4" style="color: var(--fresh-green);"></i>
+                        <h4 class="card-title fw-bold mb-3" id="service3-title">Maintenance & Repair</h4>
+                        <p class="card-text text-muted" id="service3-desc">Professional technical support, maintenance, and repair services for your vessels.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İLETİŞİM BÖLÜMÜ (Artık sadece iletişim bilgilerini barındırıyor) -->
+    <div id="contact" class="contact-section py-5 mt-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold" id="contact-title" style="color: var(--maritime-blue);">Contact Us</h2>
+                <div class="mx-auto mt-3" style="width: 60px; height: 3px; background-color: var(--fresh-green);"></div>
+            </div>
+            
+            <div class="row justify-content-center text-center g-5">
+                <div class="col-md-4">
+                    <div class="bg-light rounded-circle p-4 d-inline-block mb-3 shadow-sm">
+                        <i class="fa-solid fa-location-dot fa-2x" style="color: var(--maritime-blue);"></i>
+                    </div>
+                    <h5 class="fw-bold" id="location-title">Service Area</h5>
+                    <p class="text-muted" id="location-desc">All Ports between Samsun & Artvin / Türkiye</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-light rounded-circle p-4 d-inline-block mb-3 shadow-sm">
+                        <i class="fa-solid fa-envelope fa-2x" style="color: var(--maritime-blue);"></i>
+                    </div>
+                    <h5 class="fw-bold" id="email-title">Email</h5>
+                    <p class="text-muted">support@sargonashipchendler.com</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-light rounded-circle p-4 d-inline-block mb-3 shadow-sm">
+                        <i class="fa-solid fa-phone fa-2x" style="color: var(--maritime-blue);"></i>
+                    </div>
+                    <h5 class="fw-bold" id="phone-title">Phone / WhatsApp</h5>
+                    <p class="text-muted">+90 530 503 34 61</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YÜZEN WHATSAPP BUTONU -->
+    <a href="https://wa.me/905305033461" class="whatsapp-float" target="_blank" title="Contact on WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- FOOTER -->
+    <footer class="py-4 text-center mt-auto">
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Sargona Ship Chandler. <span id="footer-text">All Rights Reserved.</span></p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DİNAMİK TABLO, FORM GÖNDERME VE DİL KODLARI -->
+    <script>
+        // Modal Tablosuna Başlangıçta 10 Satır Ekleme
+        let rowCount = 0;
+        
+        function addRow() {
+            rowCount++;
+            const tbody = document.getElementById('table-body');
+            const tr = document.createElement('tr');
+            
+            // Satırlara ID'ler verilmiyor, class üzerinden DOM'da gezinilecek
+            tr.innerHTML = `
+                <td class="text-center fw-bold align-middle">${rowCount}</td>
+                <td><input type="text" class="form-control product-input" placeholder="Item name / Ürün adı"></td>
+                <td><input type="text" class="form-control qty-input" placeholder="Qty / Miktar"></td>
+                <td><input type="text" class="form-control desc-input" placeholder="Details / Detaylar"></td>
+                <td><input type="file" class="form-control image-input" accept="image/*"></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        // Sayfa yüklendiğinde otomatik 10 satır oluşturur
+        document.addEventListener("DOMContentLoaded", function() {
+            for(let i=0; i<10; i++){
+                addRow();
+            }
+        });
+
+        // Formu Gönderme Fonksiyonu (Sadece dolu olanları filtreler)
+        function submitForm() {
+            const vesselName = document.getElementById('modal-vessel').value;
+            const contactEmail = document.getElementById('modal-email').value;
+
+            // Basit doğrulama
+            if (!vesselName || !contactEmail) {
+                alert("Lütfen Gemi Adı ve E-posta alanlarını doldurun. / Please fill in the Vessel Name and Email fields.");
+                return;
+            }
+
+            // Yeni, geçici bir form oluşturuyoruz
+            const tempForm = document.createElement('form');
+            tempForm.action = "https://formspree.io/f/xvkgdopj"; // Sizin Formspree linkiniz
+            tempForm.method = "POST";
+            tempForm.enctype = "multipart/form-data";
+            tempForm.style.display = 'none';
+
+            // Gemi adı ve E-posta'yı gizli input olarak ekliyoruz
+            tempForm.appendChild(createHiddenInput('Vessel_Name', vesselName));
+            tempForm.appendChild(createHiddenInput('Contact_Email', contactEmail));
+
+            // Tablodaki tüm satırları al
+            const rows = document.querySelectorAll('#table-body tr');
+            let itemCounter = 1;
+
+            rows.forEach((row) => {
+                const product = row.querySelector('.product-input').value.trim();
+                const qty = row.querySelector('.qty-input').value.trim();
+                const desc = row.querySelector('.desc-input').value.trim();
+                const imageFile = row.querySelector('.image-input').files[0];
+
+                // Eğer satırdaki Ürün Adı, Miktar veya Açıklama alanlarından BİRİ bile doluysa bu satırı gönder
+                if (product !== "" || qty !== "" || desc !== "" || imageFile) {
+                    
+                    if (product !== "") tempForm.appendChild(createHiddenInput(`Item_${itemCounter}_Product`, product));
+                    if (qty !== "") tempForm.appendChild(createHiddenInput(`Item_${itemCounter}_Quantity`, qty));
+                    if (desc !== "") tempForm.appendChild(createHiddenInput(`Item_${itemCounter}_Description`, desc));
+                    
+                    // Dosya varsa kopyalayıp ekle
+                    if (imageFile) {
+                        const fileInputClone = row.querySelector('.image-input').cloneNode();
+                        fileInputClone.name = `Item_${itemCounter}_Image`;
+                        // Dosyaları JS ile doğrudan form içine kopyalamak güvenlik nedeniyle kısıtlıdır, 
+                        // bu yüzden DataTransfer nesnesi kullanıyoruz.
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(imageFile);
+                        fileInputClone.files = dataTransfer.files;
+                        tempForm.appendChild(fileInputClone);
+                    }
+                    itemCounter++;
+                }
+            });
+
+            // Eğer hiç ürün girilmediyse uyar
+            if (itemCounter === 1) {
+                alert("Lütfen en az bir ürün ekleyin. / Please add at least one product.");
+                return;
+            }
+
+            // Oluşturulan geçici formu gövdeye ekle ve gönder
+            document.body.appendChild(tempForm);
+            tempForm.submit();
+        }
+
+        // Gizli Input Oluşturma Yardımcı Fonksiyonu
+        function createHiddenInput(name, value) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            return input;
+        }
+
+        // DİL SÖZLÜĞÜ (Modal metinleri eklendi)
+        const translations = {
+            en: {
+                "nav-home": "Home",
+                "nav-services": "Services",
+                "nav-contact-menu": "Contact",
+                "hero-title": "Your Reliable Partner in the Black Sea",
+                "hero-desc": "24/7 Supply of Provisions, Consumables and Technical Services between Samsun and Artvin Ports.",
+                "hero-btn": "Get a Quote",
+                "services-title": "Our Services",
+                "service1-title": "Provisions",
+                "service1-desc": "Fresh, frozen, and dry provisions supplied with the highest quality standards for your crew.",
+                "service2-title": "Deck & Engine Stores",
+                "service2-desc": "Complete range of cabin, deck, and engine consumables and marine hardware.",
+                "service3-title": "Maintenance & Repair",
+                "service3-desc": "Professional technical support, maintenance, and repair services for your vessels.",
+                "contact-title": "Contact Us",
+                "location-title": "Service Area",
+                "location-desc": "All Ports between Samsun & Artvin / Türkiye",
+                "email-title": "Email",
+                "phone-title": "Phone / WhatsApp",
+                "footer-text": "All Rights Reserved.",
+                // Modal İçin Çeviriler
+                "modal-title": "Request Form",
+                "modal-vessel": "Vessel Name",
+                "modal-email": "Your Email",
+                "th-product": "Product Name",
+                "th-qty": "Quantity",
+                "th-desc": "Description / Specs",
+                "th-image": "Image (Optional)",
+                "btn-add-row": "Add Product",
+                "btn-cancel": "Cancel",
+                "btn-submit": "Submit Request"
+            },
+            tr: {
+                "nav-home": "Ana Sayfa",
+                "nav-services": "Hizmetler",
+                "nav-contact-menu": "İletişim",
+                "hero-title": "Karadeniz'deki Güvenilir Çözüm Ortağınız",
+                "hero-desc": "Samsun ve Artvin Limanları arasında 7/24 Kumanya, Sarf Malzeme ve Teknik Hizmet Tedariği.",
+                "hero-btn": "Teklif Alın",
+                "services-title": "Hizmetlerimiz",
+                "service1-title": "Gıda (Kumanya) Tedariki",
+                "service1-desc": "Mürettebatınız için en yüksek kalite standartlarında taze, dondurulmuş ve kuru gıda tedariki.",
+                "service2-title": "Sarf Malzemeleri",
+                "service2-desc": "Kabin, güverte, makine sarf malzemeleri ve denizcilik donanımlarının eksiksiz temini.",
+                "service3-title": "Teknik Bakım & Onarım",
+                "service3-desc": "Gemileriniz için profesyonel teknik destek, bakım ve onarım hizmetleri.",
+                "contact-title": "İletişim",
+                "location-title": "Hizmet Bölgesi",
+                "location-desc": "Samsun ve Artvin Arasındaki Tüm Limanlar / Türkiye",
+                "email-title": "E-posta",
+                "phone-title": "Telefon / WhatsApp",
+                "footer-text": "Tüm Hakları Saklıdır.",
+                // Modal İçin Çeviriler
+                "modal-title": "Talep Formu",
+                "modal-vessel": "Gemi Adı",
+                "modal-email": "E-posta Adresiniz",
+                "th-product": "Ürün Adı",
+                "th-qty": "Miktar",
+                "th-desc": "Açıklama",
+                "th-image": "Görsel (Opsiyonel)",
+                "btn-add-row": "Ürün Ekle",
+                "btn-cancel": "İptal",
+                "btn-submit": "Gönder"
+            }
+        };
+
+        function changeLanguage(lang) {
+            for (let key in translations[lang]) {
+                let element = document.getElementById(key);
+                if (element) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.setAttribute('placeholder', translations[lang][key]);
+                    } else {
+                        element.textContent = translations[lang][key];
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
